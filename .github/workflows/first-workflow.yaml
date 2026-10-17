@@ -1,0 +1,48 @@
+name: First workflow
+on: push
+jobs:
+    lint:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Setup Nodejs
+          uses: actions/setup-node@v6
+          with:
+            node-version: 22
+            cache: npm
+        - name: Install dependencies
+          run: npm ci
+        - name: Run Linter
+          run: npm run lint
+    test:                        
+      needs: lint
+      runs-on: ubuntu-latest     # Standard GitHub-hosted runners for public repositories
+      steps:
+        - name: Get Code
+          uses: actions/checkout@v3   #stick to specific version to prevent build failure
+        - name: Install NodeJS
+          uses: actions/Setup-node@v3 #stick to specific version to prevent build failure
+          with:
+            node-version: '22'          #stick to specific version to prevent build failure
+        - name: Install dependencies
+          run: npm ci
+        - name: Run tests 
+          run: npm test
+    deploy:
+    # when you add `needs`, current job waits for that job to finish first
+      needs: test
+      runs-on: ubuntu-latest    # Standard GitHub-hosted runners for public repositories
+      steps:
+        - name: Get Code
+          uses: actions/checkout@v3   #stick to specific version to prevent build failure
+        - name: Install NodeJS
+          uses: actions/Setup-node@v3 #stick to specific version to prevent build failure
+          with:
+            node-version: 22          #stick to specific version to prevent build failure
+        - name: Install dependencies
+          run: npm ci
+        - name: Build project
+          run: npm run build
+        - name: Deploy
+          run: echo "Deploying .."
